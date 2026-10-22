@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>CS2 Teams — Admin</title>
+    <style>
+        body{font-family:Arial, sans-serif; margin:24px}
+        h1,h2{margin:12px 0}
+        form{margin:16px 0}
+        input, select, button{padding:8px; margin:4px 0}
+        table{border-collapse:collapse; width:100%; max-width:1100px}
+        th,td{border:1px solid #ddd; padding:8px; text-align:left; vertical-align:top}
+        th{background:#f5f5f5}
+        small{color:#666}
+        .grid{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start}
+        .row{display:flex; align-items:center; gap:8px}
+        .logo{width:48px; height:48px; object-fit:contain; border:1px solid #eee; border-radius:6px; padding:4px; background:#fff}
+        .avatar{width:26px; height:26px; border-radius:6px; object-fit:cover; border:1px solid #eee; background:#fff}
+        .flag{width:22px; height:16px; border-radius:2px; border:1px solid #eee; object-fit:cover; background:#fff}
+    </style>
+</head>
+<body>
+
+<p><a href="/">← Back to Public</a></p>
+
+<h1>CS2 Teams — Admin</h1>
+
+<div class="grid">
+    <!-- Add Team -->
+    <div>
+        <h2>Add Team</h2>
+        <form th:action="@{/teams/add}" th:object="${team}" method="post">
+            <div><input type="text" th:field="*{name}" placeholder="Team name" required /></div>
+            <div><input type="text" th:field="*{country}" placeholder="Country/Region"/></div>
+            <div><input type="number" th:field="*{worldRank}" placeholder="World rank"/></div>
+            <div><input type="text" th:field="*{coachName}" placeholder="Coach name"/></div>
+            <div><input type="url" th:field="*{logoUrl}" placeholder="Logo URL (https://...)" /></div>
+            <button type="submit">Add Team</button>
+        </form>
+        <small>Tip: pune direct link către un PNG/JPG pentru logo.</small>
+    </div>
+
+    <!-- Add Player to Team -->
+    <div>
+        <h2>Add Player to Team</h2>
+        <form th:action="@{/players/addToTeam}" method="post">
+            <label>Team:
+                <select name="teamId" required>
+                    <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"></option>
+                </select>
+            </label>
+            <div><input type="text" name="nickname" placeholder="Nickname" required/></div>
+            <div><input type="text" name="fullName" placeholder="Full name"/></div>
+            <div><input type="text" name="country" placeholder="Country"/></div>
+            <div><input type="text" name="role" placeholder="Role (IGL, AWPer, Rifler...)"/></div>
+            <div><input type="number" name="age" placeholder="Age"/></div>
+            <div><input type="url" name="photoUrl" placeholder="Photo URL (https://...)" /></div>
+            <div><input type="text" name="countryCode" placeholder="Country Code (ex: FR, DK, RO)" maxlength="2" /></div>
+
+            <label><input type="checkbox" name="igl"/> IGL</label>
+            <div><button type="submit">Add Player</button></div>
+        </form>
+    </div>
+</div>
+
+<h2>Teams & Current Rosters</h2>
+<table>
+    <tr>
+        <th>Team</th>
+        <th>Country</th>
+        <th>Rank</th>
+        <th>Coach</th>
+        <th>Active Roster</th>
+    </tr>
+    <tr th:each="t : ${teams}">
+        <td>
+            <div class="row">
+                <img class="logo" th:if="${t.logoUrl}" th:src="${t.logoUrl}" alt="logo"/>
+                <span th:text="${t.name}"></span>
+            </div>
+        </td>
+        <td th:text="${t.country}"></td>
+        <td th:text="${t.worldRank}"></td>
+        <td th:text="${t.coachName}"></td>
+        <td>
+            <table>
+                <tr>
+                    <th>Player</th>
+                    <th>Role</th>
+                    <th>Country</th>
+                    <th>IGL</th>
+                    <th>Remove</th>
+                </tr>
+                <tr th:each="m : ${t.memberships}">
+                    <td th:if="${m.active}">
+                        <div class="row">
+                            <img class="avatar" th:if="${m.player.photoUrl}" th:src="${m.player.photoUrl}" alt="player"/>
+                            <span th:text="${m.player.nickname}"></span>
+                        </div>
+                    </td>
+                    <td th:if="${m.active}" th:text="${m.player.role}"></td>
+                    <td th:if="${m.active}">
+                        <div class="row">
+                            <img class="flag"
+                                 th:if="${m.player.countryCode}"
+                                 th:src="${'https://flagcdn.com/24x18/' + #strings.toLowerCase(m.player.countryCode) + '.png'}"
+                                 th:alt="${m.player.countryCode}">
+                            <span th:text="${m.player.country}"></span>
+                        </div>
+                    </td>
+                    <td th:if="${m.active}" th:text="${m.igl ? 'Yes' : 'No'}"></td>
+                    <td th:if="${m.active}">
+                        <form th:action="@{/teams/{teamId}/remove/{mid}(teamId=${t.id},mid=${m.id})}" method="post"
+                              onsubmit="return confirm('Completely remove this player? If not in other teams, the player will be deleted too.');">
+                            <button type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+            <small>Remove will delete the membership; if the player has no other teams, the player record is deleted too.</small>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

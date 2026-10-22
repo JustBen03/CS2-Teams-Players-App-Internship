@@ -1,0 +1,23 @@
+### create team
+POST http://localhost:8080/api/teams
+Content-Type: application/json
+
+{ "name": "Vitality", "country": "France", "worldRank": 1, "coachName": "XTQZZZ" }
+
+### create player
+POST http://localhost:8080/api/players
+Content-Type: application/json
+
+{ "nickname": "ZywOo", "fullName": "Mathieu Herbaut", "country": "France", "role": "AWPer", "age": 24 }
+
+### list teams
+GET http://localhost:8080/api/teams
+
+### list players
+GET http://localhost:8080/api/players
+
+### add player to team (replace ids after creating above)
+POST http://localhost:8080/api/teams/1/addPlayer/1?igl=true
+
+### show roster
+GET http://localhost:8080/api/teams/1/roster

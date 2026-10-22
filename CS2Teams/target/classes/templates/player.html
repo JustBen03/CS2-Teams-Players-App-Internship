@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title th:text="${'Player — ' + player.nickname}">Player</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+    <style>
+        .player-hero{
+            display:flex; gap:16px; align-items:center; margin-bottom:16px;
+            background:linear-gradient(180deg, rgba(18,24,38,.95), rgba(18,24,38,.85));
+            border:1px solid var(--line); border-radius:14px; padding:16px;
+            box-shadow: var(--soft);
+        }
+        .hero-photo{
+            width:96px; height:96px; border-radius:16px; object-fit:cover;
+            border:1px solid var(--line); background:#0b0e14;
+        }
+        .hero-title{ display:flex; align-items:center; gap:10px; }
+        .hero-name{ font-size:22px; font-weight:800; margin:0; }
+        .hero-sub{ color:var(--muted); font-size:13px; }
+        .back{ text-decoration:none; color:var(--text); border:1px solid var(--line); padding:6px 10px; border-radius:10px; }
+        .back:hover{ border-color:var(--accent); box-shadow:var(--glow); }
+    </style>
+</head>
+<body>
+<header class="header-bar">
+    <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="22" class="ring"/>
+            <path d="M32 8v8M32 48v8M8 32h8M48 32h8" class="ticks"/>
+            <circle cx="32" cy="32" r="3" class="dot"/>
+        </svg>
+        <div class="brand-text">
+            <h1 class="brand-title">Player Profile</h1>
+            <div class="brand-sub">Details & team history</div>
+        </div>
+    </div>
+    <nav class="header-actions">
+        <a class="btn" href="/">Back to Teams</a>
+        <a class="btn" href="/admin">Admin</a>
+    </nav>
+</header>
+
+<main style="max-width:1000px; margin:0 auto; padding:24px">
+    <a class="back" href="/">← Back</a>
+
+    <section class="player-hero">
+        <img class="hero-photo" th:if="${player.photoUrl}" th:src="${player.photoUrl}" alt="player"
+             onerror="this.style.display='none'">
+        <div>
+            <div class="hero-title">
+                <h2 class="hero-name" th:text="${player.nickname}"></h2>
+                <span class="chip" th:if="${player.role}" th:text="${player.role}"></span>
+            </div>
+            <div class="hero-sub" th:if="${player.fullName}" th:text="${player.fullName}"></div>
+
+            <div class="row" style="gap:8px; margin-top:6px">
+                <div class="row" style="gap:6px">
+                    <img class="flag"
+                         th:if="${player.countryCode}"
+                         th:src="${'https://flagcdn.com/24x18/' + #strings.toLowerCase(player.countryCode) + '.png'}"
+                         th:alt="${player.countryCode}">
+                    <span th:text="${player.country != null ? player.country : (player.countryCode != null ? player.countryCode : '')}"></span>
+                </div>
+                <span th:if="${player.age != null}" class="muted">•</span>
+                <span th:if="${player.age != null}" class="muted" th:text="${'Age ' + player.age}"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h3 style="margin-top:0">Team History</h3>
+        <table>
+            <thead>
+            <tr><th>Team</th><th>From</th><th>To</th><th>Status</th><th>IGL</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="m : ${history}">
+                <td>
+                    <div class="row">
+                        <img class="logo" th:if="${m.team.logoUrl}" th:src="${m.team.logoUrl}" alt="logo">
+                        <span th:text="${m.team.name}"></span>
+                    </div>
+                </td>
+                <td th:text="${m.startDate}"></td>
+                <td th:text="${m.endDate != null ? m.endDate : '—'}"></td>
+                <td th:text="${m.active ? 'Active' : 'Inactive'}"></td>
+                <td th:text="${m.igl ? 'Yes' : 'No'}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(history)}">
+                <td colspan="5" class="muted">No history recorded.</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
